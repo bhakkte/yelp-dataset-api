@@ -1,3 +1,0 @@
-mongodb_secured_username: "{{ vaulted_mongodb_secured_username }}"
-mongodb_secured_password: "{{ vaulted_mongodb_secured_password }}"
-mongodb_secured_datadog_password: "{{ vaulted_mongodb_secured_datadog_password }}"
