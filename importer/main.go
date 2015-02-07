@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/kiasaki/yelp-dataset-api/data"
+	"labix.org/v2/mgo"
 )
 
 // Readln returns a single line (without the ending \n)
@@ -29,22 +30,39 @@ func Readln(r *bufio.Reader) (string, error) {
 
 var fileLocation = flag.String("file", "", "Location on Yelp json dump to import")
 var importType = flag.String("type", "user", "Import type, options are: user, business, review")
+var dbUrl = flag.String("mongo-url", "mongodb://localhost:27017/yelp-dataset-api", "MongoDB url")
 
-func main() {
-	flag.Parse()
+func dialMongo(url string) *mgo.Session {
+	dbSession, err := mgo.Dial(url)
+	if err != nil {
+		panic(err)
+	}
+	data.Index(dbSession.DB(""))
+	return dbSession
+}
 
-	if *fileLocation == "" {
+func acquireFileHandle(location string) *os.File {
+	if location == "" {
 		fmt.Println("File to import location is required")
 		os.Exit(1)
 	} else {
-		fmt.Println("Importing: " + *fileLocation)
+		fmt.Println("Importing: " + location)
 	}
 
-	fileHandle, err := os.Open(*fileLocation)
+	fileHandle, err := os.Open(location)
 	if err != nil {
 		fmt.Printf("Error opening file: %v\n", err)
 		os.Exit(1)
 	}
+
+	return fileHandle
+}
+
+func main() {
+	flag.Parse()
+
+	dbSession := dialMongo(*dbUrl)
+	fileHandle := acquireFileHandle(*fileLocation)
 
 	i := 0
 	reader := bufio.NewReader(fileHandle)
@@ -56,22 +74,21 @@ func main() {
 				fmt.Println(err)
 				os.Exit(1)
 			}
-			//var formatted []byte
-			//if formatted, err = json.MarshalIndent(user, "", "  "); err != nil {
-			//	fmt.Println(err)
-			//	os.Exit(1)
-			//}
-			//fmt.Println(string(formatted))
+			// Save to mongo
+			if err := user.Save(dbSession.DB("")); err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
 		}
 		line, err = Readln(reader)
 
 		i = i + 1
-		if i%100 == 0 {
+		if i%1000 == 0 {
 			fmt.Printf("Processed %d\n", i)
 		}
-		if i > 1000 {
+		if i > 2 {
 			break
 		}
 	}
-	fmt.Println("Done")
+	fmt.Println("\nDone!")
 }
