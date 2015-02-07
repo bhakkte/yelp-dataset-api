@@ -26,6 +26,7 @@ func main() {
 		v1.GET("/", handleHome)
 		v1.GET("/users", handleUsers)
 		v1.GET("/users/:id", handleUser)
+		v1.GET("/businesses/:id/words", handleBusinessWords)
 	}
 
 	router.Run(":" + strconv.Itoa(*port))
@@ -48,9 +49,10 @@ func handleHome(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"message": "Index of Yelp Dataset Api",
 		"endpoints": gin.H{
-			"/users":             "Lists few selected interesting users",
-			"/users/:id":         "Shows one user's profile",
-			"/users/:id/reviews": "Lists one users reviews including associated business info",
+			"/users":                "Lists few selected interesting users",
+			"/users/:id":            "Shows one user's profile",
+			"/users/:id/reviews":    "Lists one users reviews including associated business info",
+			"/businesses/:id/words": "Words in reviews ranked by occurences count",
 		},
 	})
 }
