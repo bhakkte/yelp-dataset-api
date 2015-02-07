@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -49,22 +50,26 @@ func main() {
 	reader := bufio.NewReader(fileHandle)
 	line, err := Readln(reader)
 	for err == nil {
-		if importType == "user" {
+		if *importType == "user" {
 			var user data.YelpUser
-			if uErr := json.Unmarshal(line, &user); uErr != nil {
+			if uErr := json.Unmarshal([]byte(line), &user); uErr != nil {
 				fmt.Println(err)
 				os.Exit(1)
 			}
-			if formatted, err := json.MarshalIndent(user, "", "  "); err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
-			fmt.Println(string(formatted))
+			//var formatted []byte
+			//if formatted, err = json.MarshalIndent(user, "", "  "); err != nil {
+			//	fmt.Println(err)
+			//	os.Exit(1)
+			//}
+			//fmt.Println(string(formatted))
 		}
 		line, err = Readln(reader)
 
 		i = i + 1
-		if i > 10 {
+		if i%100 == 0 {
+			fmt.Printf("Processed %d\n", i)
+		}
+		if i > 1000 {
 			break
 		}
 	}
