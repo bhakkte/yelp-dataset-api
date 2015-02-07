@@ -1,0 +1,13 @@
+- name: setup hostname is instance_hostname is defined
+  hostname: name={{ instance_hostname }}
+  sudo: yes
+  when: instance_hostname is defined
+  notify: restart-hostname
+
+- name: Update /etc/hosts with hostname
+  lineinfile: dest=/etc/hosts
+    regexp="^127\.0\.1\.1"
+    line="127.0.1.1{{'\t'}}{{ instance_hostname }}"
+    state=present
+  sudo: yes
+  when: instance_hostname is defined

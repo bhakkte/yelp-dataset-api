@@ -1,0 +1,16 @@
+- name: copy bash_profile to remote
+  copy:
+    src: bash_profile
+    dest: /home/orch/.bash_profile
+    group: orch
+    owner: orch
+    mode: 700
+
+
+- name: copy bashrc to remote
+  copy:
+    src: bashrc
+    dest: /home/orch/.bashrc
+    group: orch
+    owner: orch
+    mode: 700

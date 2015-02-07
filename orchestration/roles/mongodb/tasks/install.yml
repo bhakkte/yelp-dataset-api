@@ -1,0 +1,43 @@
+- name: install pymongo python package for adding users later
+  apt: package=python-pymongo state=present
+  sudo: yes
+
+
+- name: add 10gen apt key
+  apt_key: id='7F0CEB10'
+    keyserver='hkp://keyserver.ubuntu.com:80'
+    state=present
+  sudo: yes
+
+
+- name: add 10gen repository
+  apt_repository: repo='deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen'
+    state=present
+  sudo: yes
+
+
+- name: update apt cache
+  apt: update_cache=yes
+  sudo: yes
+
+
+- name: install mongodb
+  apt: name=mongodb-10gen state=present
+  sudo: yes
+
+
+- name: push configuration file to remote
+  template: src=mongodb.conf.j2
+    dest=/etc/mongodb.conf
+    owner=root
+    group=root
+    mode=0644
+  sudo: yes
+  notify:
+    - mongodb-restart
+
+
+- name: ensure mongodb is running
+  service: name=mongodb
+    state=started
+  sudo: yes

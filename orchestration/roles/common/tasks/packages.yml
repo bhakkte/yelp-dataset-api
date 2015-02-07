@@ -1,0 +1,14 @@
+- name: install essential packages
+  apt:
+    pkg: '{{ item }}'
+    state: present
+  sudo: yes
+  with_items:
+    - htop
+    - curl
+    - tmux
+    - vim
+    - unzip
+    - python-software-properties
+    - software-properties-common
+    - silversearcher-ag

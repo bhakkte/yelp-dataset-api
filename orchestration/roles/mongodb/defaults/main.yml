@@ -1,0 +1,2 @@
+mongodb_backups_aws_bucket: ops-mongodb-backups
+mongodb_backups_aws_region: us-east-1

@@ -1,0 +1,11 @@
+- name: mongodb-start
+  service: name=mongodb state=started
+  sudo: yes
+
+- name: mongodb-restart
+  service: name=mongodb state=restarted
+  sudo: yes
+
+- name: mongodb-reload
+  service: name=mongodb state=reloaded
+  sudo: yes

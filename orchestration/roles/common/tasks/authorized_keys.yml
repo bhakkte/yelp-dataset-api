@@ -1,0 +1,6 @@
+- name: add authorized users public keys
+  authorized_key:
+    key: '{{ item }}'
+    user: ubuntu
+  with_items: allowed_keys
+  when: allowed_keys is defined

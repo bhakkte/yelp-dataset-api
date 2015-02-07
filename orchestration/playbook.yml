@@ -1,0 +1,10 @@
+---
+
+- hosts: all
+  vars_files:
+    - vault.yml
+  vars:
+    - hostname: 'yack-mongodb'
+  roles:
+    - common
+    - mongodb

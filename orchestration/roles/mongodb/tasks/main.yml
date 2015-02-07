@@ -1,0 +1,25 @@
+# File: tasks/main.yml
+# Part: mongodb
+#
+# Description:
+#   Installs MongoDB from 10gen packages
+#   Sets up an administrator accont
+#   Adds a cron to backup MongoDB nightly
+#
+# Parameters:
+#   mongodb_secured_username
+#   mongodb_secured_password
+#   mongodb_backups_password
+#   mongodb_backups_aws_bucket
+#   mongodb_backups_aws_region
+#   mongodb_backups_aws_access_key
+#   mongodb_backups_aws_secret_key
+#
+# Dependencies:
+#   common
+#
+# OS familly: Ubuntu 14.04
+
+- include: install.yml
+- install: admin.yml
+- include: backups.yml

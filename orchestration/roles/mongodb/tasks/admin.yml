@@ -1,0 +1,7 @@
+- name: add database administrator user
+  mongodb_user:
+    database: admin
+    roles: "userAdminAnyDatabase,readWriteAnyDatabase"
+    name: "{{ mongodb_secured_username }}"
+    password: "{{ mongodb_secured_password }}"
+  sudo: yes
