@@ -93,38 +93,79 @@ func main() {
 
 	i := 0
 	reader := bufio.NewReader(fileHandle)
-	line, err := Readln(reader)
-	for err == nil {
-		if *importType == "user" {
-			model := data.YelpUser{}
-			err = json.Unmarshal([]byte(line), &model)
-			handleFatalError(err)
-			err = data.Save(dbSession.DB(""), model)
-			handleFatalError(err)
-		} else if *importType == "business" {
-			model := data.YelpBusiness{}
-			err = json.Unmarshal([]byte(line), &model)
-			handleFatalError(err)
-			err = data.Save(dbSession.DB(""), model)
-			handleFatalError(err)
-		} else if *importType == "review" {
-			model := data.YelpReview{}
-			err = json.Unmarshal([]byte(line), &model)
-			handleFatalError(err)
-			err = data.Save(dbSession.DB(""), model)
-			handleFatalError(err)
-		}
-		// Read next
-		line, err = Readln(reader)
+	fan := make(chan bool)
+	errChannel := make(chan error)
 
-		i = i + 1
-		if i%1000 == 0 {
-			fmt.Printf("Processed %d\n", i)
+	lineRequestChan := make(chan bool)
+	lineFeedChan := make(chan string)
+
+	go func() {
+		for {
+			select {
+			case <-lineRequestChan:
+				if line, err := Readln(reader); err != nil {
+					errChannel <- err
+					break
+				} else {
+					lineFeedChan <- line
+				}
+			}
 		}
-		// TODO: Temporary limit to not bloat local db
-		if i >= 100 {
-			break
+	}()
+
+	for count := 0; count < 30; count++ {
+		go func() {
+			workerSession := dbSession.Copy()
+			for {
+				var err error
+				lineRequestChan <- true
+				line := <-lineFeedChan
+
+				var model data.Model
+				if *importType == "user" {
+					parsed := data.YelpUser{}
+					err = json.Unmarshal([]byte(line), &parsed)
+					model = parsed
+				} else if *importType == "business" {
+					parsed := data.YelpBusiness{}
+					err = json.Unmarshal([]byte(line), &parsed)
+					model = parsed
+				} else if *importType == "review" {
+					parsed := data.YelpReview{}
+					err = json.Unmarshal([]byte(line), &parsed)
+					model = parsed
+				}
+
+				if err != nil {
+					errChannel <- err
+					break
+				}
+				if err = data.Save(workerSession.DB(""), model); err != nil {
+					errChannel <- err
+					break
+				}
+
+				fan <- true
+			}
+		}()
+	}
+
+	for {
+		select {
+		case <-fan:
+			i++
+			if i%1000 == 0 {
+				fmt.Printf("Processed %d\n", i)
+			}
+		case err := <-errChannel:
+			if err.Error() == "EOF" {
+				fmt.Println("\nDone!")
+				os.Exit(0)
+				break
+			} else {
+				panic(err)
+				break
+			}
 		}
 	}
-	fmt.Println("\nDone!")
 }
