@@ -5,13 +5,19 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/kiasaki/yelp-dataset-api/data"
+	"labix.org/v2/mgo"
 )
 
+var dbSession *mgo.Session
+
 var port = flag.Int("port", 8080, "Port to listen on")
+var dbUrl = flag.String("mongo-url", "mongodb://localhost:27017/yelp-dataset-api", "MongoDB url")
 
 func main() {
 	flag.Parse()
 
+	dbSession = dialMongo(*dbUrl)
 	router := gin.Default()
 
 	router.GET("/", handleDefaultVersionRedirect)
@@ -23,6 +29,15 @@ func main() {
 	}
 
 	router.Run(":" + strconv.Itoa(*port))
+}
+
+func dialMongo(url string) *mgo.Session {
+	dbSession, err := mgo.Dial(url)
+	if err != nil {
+		panic(err)
+	}
+	data.Index(dbSession.DB(""))
+	return dbSession
 }
 
 func handleDefaultVersionRedirect(c *gin.Context) {
