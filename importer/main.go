@@ -58,35 +58,71 @@ func acquireFileHandle(location string) *os.File {
 	return fileHandle
 }
 
+func clearTypeTable(dbSession *mgo.Session, importType string) {
+	var collection string
+	if importType == "user" {
+		collection = "users"
+	} else if importType == "business" {
+		collection = "businesses"
+	} else if importType == "review" {
+		collection = "reviews"
+	} else {
+		fmt.Println("Import type didn't match user, business or review")
+		os.Exit(1)
+	}
+	// Empty db
+	if _, err := dbSession.DB("").C(collection).RemoveAll(nil); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
+func handleFatalError(err error) {
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
 func main() {
 	flag.Parse()
 
 	dbSession := dialMongo(*dbUrl)
 	fileHandle := acquireFileHandle(*fileLocation)
+	clearTypeTable(dbSession, *importType)
 
 	i := 0
 	reader := bufio.NewReader(fileHandle)
 	line, err := Readln(reader)
 	for err == nil {
 		if *importType == "user" {
-			var user data.YelpUser
-			if uErr := json.Unmarshal([]byte(line), &user); uErr != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
-			// Save to mongo
-			if err := user.Save(dbSession.DB("")); err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
+			model := data.YelpUser{}
+			err = json.Unmarshal([]byte(line), &model)
+			handleFatalError(err)
+			err = data.Save(dbSession.DB(""), model)
+			handleFatalError(err)
+		} else if *importType == "business" {
+			model := data.YelpBusiness{}
+			err = json.Unmarshal([]byte(line), &model)
+			handleFatalError(err)
+			err = data.Save(dbSession.DB(""), model)
+			handleFatalError(err)
+		} else if *importType == "review" {
+			model := data.YelpReview{}
+			err = json.Unmarshal([]byte(line), &model)
+			handleFatalError(err)
+			err = data.Save(dbSession.DB(""), model)
+			handleFatalError(err)
 		}
+		// Read next
 		line, err = Readln(reader)
 
 		i = i + 1
 		if i%1000 == 0 {
 			fmt.Printf("Processed %d\n", i)
 		}
-		if i > 2 {
+		// TODO: Temporary limit to not bloat local db
+		if i >= 100 {
 			break
 		}
 	}

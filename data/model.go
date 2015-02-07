@@ -1,26 +1,21 @@
 package data
 
 import (
-	"errors"
-
 	"labix.org/v2/mgo"
 )
 
-type Model struct {
-	Id string
+type Model interface {
+	TableName() string
+	GetId() interface{}
 }
 
-func (m *Model) TableName() string {
-	panic(errors.New("TableName() not implemented on model"))
-}
-
-func (m *Model) Save(db *mgo.Database) error {
+func Save(db *mgo.Database, m Model) error {
 	var err error
 
-	if m.Id == "" {
+	if m.GetId() == "" {
 		err = db.C(m.TableName()).Insert(m)
 	} else {
-		_, err = db.C(m.TableName()).UpsertId(m.Id, m)
+		_, err = db.C(m.TableName()).UpsertId(m.GetId(), m)
 	}
 
 	return err
