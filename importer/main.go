@@ -129,6 +129,7 @@ func main() {
 				} else if *importType == "business" {
 					parsed := data.YelpBusiness{}
 					err = json.Unmarshal([]byte(line), &parsed)
+					parsed.Loc = []float32{parsed.Longitude, parsed.Latitude}
 					model = parsed
 				} else if *importType == "review" {
 					parsed := data.YelpReview{}

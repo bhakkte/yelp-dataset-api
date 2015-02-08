@@ -4,11 +4,13 @@ type YelpBusiness struct {
 	Id          string                 `json:"business_id" bson:"_id,omitempty"`
 	Name        string                 `json:"name" bson:"name"`
 	FullAddress string                 `json:"full_address" bson:"full_address"`
+	City        string                 `json:"city" bson:"city"`
 	Open        bool                   `json:"open" bson:"open"`
 	Categories  []string               `json:"categories" bson:"categories"`
 	ReviewCount int                    `json:"review_count" bson:"review_count"`
 	Latitude    float32                `json:"latitude" bson:"latitude"`
 	Longitude   float32                `json:"longitude" bson:"longitude"`
+	Loc         []float32              `json:"loc,omitempty" bson:"loc,omitempty"`
 	Stars       float32                `json:"stars" bson:"stars"`
 	Attributes  map[string]interface{} `json:"attributes" bson:"attributes"`
 }

@@ -23,4 +23,10 @@ func Index(db *mgo.Database) {
 	}); err != nil {
 		panic(err)
 	}
+
+	if err := db.C("businesses").EnsureIndex(mgo.Index{
+		Key: []string{"$2dsphere:loc"},
+	}); err != nil {
+		panic(err)
+	}
 }

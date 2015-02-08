@@ -27,6 +27,7 @@ func main() {
 		v1.GET("/users", handleUsers)
 		v1.GET("/users/:id", handleUser)
 		v1.GET("/businesses/:id/words", handleBusinessWords)
+		v1.GET("/montreal/businesses/words", handleMontrealReviewWords)
 	}
 
 	router.Run(":" + strconv.Itoa(*port))
