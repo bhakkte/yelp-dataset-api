@@ -19,6 +19,9 @@ func main() {
 
 	dbSession = dialMongo(*dbUrl)
 	router := gin.Default()
+	router.Use(func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+	})
 
 	router.GET("/", handleDefaultVersionRedirect)
 	v1 := router.Group("/v1")
