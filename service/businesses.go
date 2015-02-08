@@ -55,7 +55,7 @@ func handleLocationWords(c *gin.Context) {
 	reviews := []data.YelpReview{}
 	err = dbSession.DB("").C("reviews").Find(bson.M{
 		"business_id": bson.M{"$in": businessIds},
-	}).Select(bson.M{"text": 1}).All(&reviews)
+	}).Select(bson.M{"business_id": 1, "text": 1}).All(&reviews)
 
 	if err != nil {
 		c.JSON(500, gin.H{"message": err.Error()})
@@ -110,12 +110,13 @@ func figureOutPopularWords(c *gin.Context, reviews []data.YelpReview) {
 	}
 
 	// Sort businesses in those top 200 words
-	for _, word := range sortedWords {
+	for i, word := range sortedWords {
 		word.SortedBusinesses = ksort.SortMapByValue(word.Businesses)
 		if len(word.SortedBusinesses) > 5 {
 			word.SortedBusinesses = word.SortedBusinesses[:5]
 		}
-		word.Businesses = map[string]int{}
+		word.Businesses = nil
+		sortedWords[i] = word
 	}
 
 	c.JSON(200, gin.H{"words": sortedWords})
