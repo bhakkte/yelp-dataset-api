@@ -46,3 +46,69 @@ db.businesses.find({
 }, {_id: 1, name: 1, city: 1, stars: 1, review_count: 1})
 .sort({review_count: -1})
 ```
+
+Businesses in Edinburgh (by city name) grouped by star rating
+
+```javascript
+db.businesses.group({
+    initial: {
+        count: 0
+    },
+    reduce: function(curr, res) {
+        res.count++;
+    },
+    key: {
+        stars: 1
+    },
+    cond: {city: Edinburgh}
+})
+```
+
+Quick and dirty star count js script
+
+```javascript
+var rawstars = {
+    "0" : {
+        "stars" : 4,
+        "count" : 2885
+    },
+    "1" : {
+        "stars" : 4.5,
+        "count" : 2028
+    },
+    "2" : {
+        "stars" : 3,
+        "count" : 1887
+    },
+    "3" : {
+        "stars" : 2.5,
+        "count" : 1201
+    },
+    "4" : {
+        "stars" : 5,
+        "count" : 1739
+    },
+    "5" : {
+        "stars" : 3.5,
+        "count" : 2928
+    },
+    "6" : {
+        "stars" : 1.5,
+        "count" : 263
+    },
+    "7" : {
+        "stars" : 2,
+        "count" : 551
+    },
+    "8" : {
+        "stars" : 1,
+        "count" : 147
+    }
+  };
+var result = [];
+for (key in rawstars) {
+  var v = rawstars[key];
+  result[v.stars * 2] = "("+v.stars+","+v.count+")";
+}
+console.log("[" + result.join(", ").slice(4) + "]")
+```
