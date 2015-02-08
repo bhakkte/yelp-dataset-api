@@ -94,7 +94,13 @@ func figureOutPopularWords(c *gin.Context, reviews []data.YelpReview) {
 		}
 	}
 
-	c.JSON(200, gin.H{"words": sortMapByValue(words)[:200]})
+	sortedWords := sortMapByValue(words)
+	// Cap words returned at 200 (so we dont get a dictionary of 36 000 w)
+	if len(sortedWords) >= 200 {
+		sortedWords = sortedWords[:200]
+	}
+
+	c.JSON(200, gin.H{"words": sortedWords})
 }
 
 func sortWords(m map[string]int) map[string]int {
