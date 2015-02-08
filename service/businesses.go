@@ -86,7 +86,7 @@ func figureOutPopularWords(c *gin.Context, reviews []data.YelpReview) {
 		r := strings.NewReplacer(",", "", ".", "", ":", "", ";", "", "!", "",
 			"that", "", "this", "", "with", "", "have", "", "they", "", "here", "",
 			"just", "", "where", "", "their", "", "it's", "", "were", "", "them", "",
-			"from", "", "than", "", "this", "don't", "", "didn't", "", "i've", "",
+			"from", "", "than", "", "this", "", "don't", "", "didn't", "", "i've", "",
 			"it's", "")
 		reviewWords := strings.Split(r.Replace(strings.ToLower(review.Text)), " ")
 		for _, reviewWord := range reviewWords {
