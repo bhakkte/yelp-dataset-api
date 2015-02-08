@@ -112,6 +112,10 @@ func figureOutPopularWords(c *gin.Context, reviews []data.YelpReview) {
 	// Sort businesses in those top 200 words
 	for _, word := range sortedWords {
 		word.SortedBusinesses = ksort.SortMapByValue(word.Businesses)
+		if len(word.SortedBusinesses) > 5 {
+			word.SortedBusinesses = word.SortedBusinesses[:5]
+		}
+		word.Businesses = map[string]int{}
 	}
 
 	c.JSON(200, gin.H{"words": sortedWords})
@@ -120,7 +124,7 @@ func figureOutPopularWords(c *gin.Context, reviews []data.YelpReview) {
 type Word struct {
 	Word             string         `json:"word"`
 	Occurences       int            `json:"occurences"`
-	Businesses       map[string]int `json:"businesses"`
+	Businesses       map[string]int `json:"businesses,omitempty"`
 	SortedBusinesses []ksort.Pair   `json:"sorted_businesses"`
 }
 
