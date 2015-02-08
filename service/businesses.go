@@ -34,7 +34,7 @@ func handleLocationWords(c *gin.Context) {
 			"$near": bson.M{
 				"$geometry": bson.M{
 					"type":        "Point",
-					"coordinates": []float32{lat, lng},
+					"coordinates": []float32{lng, lat},
 				},
 				"$maxDistance": 5000,
 			},
