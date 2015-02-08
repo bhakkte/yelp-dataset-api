@@ -1,5 +1,8 @@
 # Queries
 
+The following is a small collection of few interesting mongodb queries you can
+run against the dataset.
+
 Cites in the dataset and their review count
 
 ```javascript
