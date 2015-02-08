@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	ksort "github.com/kiasaki/batbelt/sort"
 	"github.com/kiasaki/yelp-dataset-api/data"
 	"labix.org/v2/mgo/bson"
 )
@@ -79,58 +80,61 @@ func handleBusinessWords(c *gin.Context) {
 }
 
 func figureOutPopularWords(c *gin.Context, reviews []data.YelpReview) {
-	words := map[string]int{}
+	words := map[string]Word{}
 
 	for _, review := range reviews {
 		r := strings.NewReplacer(",", "", ".", "", ":", "", ";", "", "!", "",
 			"that", "", "this", "", "with", "", "have", "", "they", "", "here", "",
 			"just", "", "where", "", "their", "", "it's", "", "were", "", "them", "",
-			"from", "")
-		reviewWords := strings.Split(r.Replace(review.Text), " ")
+			"from", "", "than", "", "this", "don't", "", "didn't", "", "i've", "",
+			"it's", "")
+		reviewWords := strings.Split(r.Replace(strings.ToLower(review.Text)), " ")
 		for _, reviewWord := range reviewWords {
 			if len(reviewWord) > 3 {
-				words[reviewWord]++
+				val, ok := words[reviewWord]
+				if !ok {
+					val = Word{reviewWord, 0, map[string]int{}, []ksort.Pair{}}
+				}
+				val.Occurences++
+				val.Businesses[review.BusinessId]++
+				words[reviewWord] = val
 			}
 		}
 	}
 
+	// Sort words by descending occurences
 	sortedWords := sortMapByValue(words)
 	// Cap words returned at 200 (so we dont get a dictionary of 36 000 w)
 	if len(sortedWords) >= 200 {
 		sortedWords = sortedWords[:200]
 	}
 
+	// Sort businesses in those top 200 words
+	for _, word := range sortedWords {
+		word.SortedBusinesses = ksort.SortMapByValue(word.Businesses)
+	}
+
 	c.JSON(200, gin.H{"words": sortedWords})
 }
 
-func sortWords(m map[string]int) map[string]int {
-	pairList := sortMapByValue(m)
-	sortedMap := make(map[string]int, len(pairList))
-	for _, val := range pairList {
-		sortedMap[val.Key] = val.Value
-	}
-	return sortedMap
+type Word struct {
+	Word             string         `json:"word"`
+	Occurences       int            `json:"occurences"`
+	Businesses       map[string]int `json:"businesses"`
+	SortedBusinesses []ksort.Pair   `json:"sorted_businesses"`
 }
 
-// A data structure to hold a key/value pair.
-type Pair struct {
-	Key   string
-	Value int
-}
+type WordList []Word
 
-// A slice of Pairs that implements sort.Interface to sort by Value.
-type PairList []Pair
+func (p WordList) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p WordList) Len() int           { return len(p) }
+func (p WordList) Less(i, j int) bool { return p[i].Occurences > p[j].Occurences }
 
-func (p PairList) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
-func (p PairList) Len() int           { return len(p) }
-func (p PairList) Less(i, j int) bool { return p[i].Value > p[j].Value }
-
-// A function to turn a map into a PairList, then sort and return it.
-func sortMapByValue(m map[string]int) PairList {
-	p := make(PairList, len(m))
+func sortMapByValue(m map[string]Word) WordList {
+	p := make(WordList, len(m))
 	i := 0
-	for k, v := range m {
-		p[i] = Pair{k, v}
+	for _, v := range m {
+		p[i] = v
 		i++
 	}
 	sort.Sort(&p)
