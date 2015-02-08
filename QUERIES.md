@@ -46,3 +46,20 @@ db.businesses.find({
 }, {_id: 1, name: 1, city: 1, stars: 1, review_count: 1})
 .sort({review_count: -1})
 ```
+
+Businesses in Edinburgh (by city name) grouped by star rating
+
+```javascript
+db.businesses.group({
+    initial: {
+        count: 0
+    },
+    reduce: function(curr, res) {
+        res.count++;
+    },
+    key: {
+        stars: 1
+    },
+    cond: {city: Edinburgh}
+})
+```
