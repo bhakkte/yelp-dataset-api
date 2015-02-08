@@ -94,7 +94,7 @@ func figureOutPopularWords(c *gin.Context, reviews []data.YelpReview) {
 		}
 	}
 
-	c.JSON(200, gin.H{"words": sortMapByValue(words)})
+	c.JSON(200, gin.H{"words": sortMapByValue(words)[:200]})
 }
 
 func sortWords(m map[string]int) map[string]int {
