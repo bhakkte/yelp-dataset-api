@@ -16,6 +16,25 @@ func getQueryFloat(c *gin.Context, key string) (float32, error) {
 	return float32(rawFloat), err
 }
 
+func handleBusinesses(c *gin.Context) {
+	rawIds := c.Request.URL.Query().Get("ids")
+	ids := strings.Split(rawIds, ",")
+	if len(ids) == 0 {
+		c.JSON(400, gin.H{"message": "No ids provided"})
+	}
+
+	businesses := []data.YelpBusiness{}
+	err := dbSession.DB("").C("businesses").Find(bson.M{
+		"_id": bson.M{"$in": ids},
+	}).All(&businesses)
+
+	if err != nil {
+		c.JSON(500, gin.H{"message": err.Error()})
+	} else {
+		c.JSON(200, gin.H{"businesses": businesses})
+	}
+}
+
 func handleLocationWords(c *gin.Context) {
 	// Start by fetching businesses id's
 	var lat, lng float32

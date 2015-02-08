@@ -29,6 +29,7 @@ func main() {
 		v1.GET("/", handleHome)
 		v1.GET("/users", handleUsers)
 		v1.GET("/users/:id", handleUser)
+		v1.GET("/businesses", handleBusinesses)
 		v1.GET("/businesses/:id/words", handleBusinessWords)
 		v1.GET("/city/businesses/words", handleLocationWords)
 	}
@@ -56,6 +57,7 @@ func handleHome(c *gin.Context) {
 			"/users":                 "Lists few selected interesting users",
 			"/users/:id":             "Shows one user's profile",
 			"/users/:id/reviews":     "Lists one users reviews including associated business info",
+			"/businesses":            "Select all businesses in comma separated ids passed",
 			"/businesses/:id/words":  "Words in reviews ranked by occurences count",
 			"/city/businesses/words": "Words in reviews ranked by occurences count, in a 5km radius around provided lat lng",
 		},
