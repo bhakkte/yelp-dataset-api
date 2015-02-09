@@ -109,7 +109,7 @@ func figureOutPopularWords(c *gin.Context, reviews []data.YelpReview) {
 			"it's", "")
 		reviewWords := strings.Split(r.Replace(strings.ToLower(review.Text)), " ")
 		for _, reviewWord := range reviewWords {
-			if len(reviewWord) > 3 {
+			if len(reviewWord) > 4 {
 				val, ok := words[reviewWord]
 				if !ok {
 					val = Word{reviewWord, 0, map[string]int{}, []ksort.Pair{}}
